@@ -1,0 +1,193 @@
+gen_query,actual_query,gen_output,actual_output,validation,correct_output
+"
+SELECT DISTINCT coachID
+FROM coaches
+WHERE lgID = 'NBA'
+AND tmID = 'STL';
+",SELECT DISTINCT T2.coachID FROM coaches AS T1 INNER JOIN awards_coaches AS T2 ON T1.coachID = T2.coachID WHERE T1.tmID = 'STL' AND T1.lgID = 'NBA',"[('gallaha01',), ('gueriri01',), ('hannual01',), ('holzmre01',), ('levanan01',), ('macaued01',), ('martisl01',), ('pettibo01',), ('phillan01',), ('seymopa01',)]","[('gallaha01',), ('hannual01',), ('gueriri01',), ('holzmre01',)]",yes,0
+"SELECT Credit.person
+FROM Credit
+JOIN Person ON Credit.person = Person.name
+WHERE Credit.category = 'crew' AND strftime('%Y', Person.birthdate) = '1962' AND Person.birth_region = 'California';","SELECT name FROM Person WHERE SUBSTR(birthdate, 1, 4) = '1962' AND birth_region = 'California';",[],"[('Jodie Foster',), ('Rob LaZebnik',)]",yes,0
+"
+SELECT
+  COUNT(DISTINCT T1.OrderID)
+FROM central_superstore AS T1
+JOIN people AS T2
+  ON T1.CustomerID = T2.CustomerID
+WHERE
+  T2.Customer Name = ""Aaron Bergman"" AND T1.Ship Mode = ""Standard Class"";
+",SELECT COUNT(*) FROM people AS T1 INNER JOIN central_superstore AS T2 ON T1.`Customer ID` = T2.`Customer ID` WHERE T1.`Customer Name` = 'Aaron Bergman' AND T2.`Ship Mode` = 'Standard Class',,"[(4,)]",no,0
+"SELECT PATIENT FROM allergies WHERE STOP IS NOT NULL AND SUBTRACT((SUBSTR(STOP, - 2, 1)! = '9' then substr(STOP, length(STOP) - 1) + 2000 end), (SUBSTR(START, - 2, 1) = '9' then substr(START, length(START) - 1) + 1900 else substr(START, length(START) - 1) + 2000 end)) = (SELECT MAX(SUBTRACT((SUBSTR(STOP, - 2, 1)! = '9' then substr(STOP, length(STOP) - 1) + 2000 end), (SUBSTR(START, - 2, 1) = '9' then substr(START, length(START) - 1) + 1900 else substr(START, length(START) - 1) + 2000 end))) FROM allergies WHERE STOP IS NOT NULL);","SELECT PATIENT FROM allergies WHERE STOP IS NOT NULL GROUP BY PATIENT ORDER BY CASE WHEN SUBSTR(STOP, -2, 1) != '9' THEN SUBSTR(STOP, LENGTH(STOP) - 1) + 2000 END - CASE WHEN SUBSTR(START, -2, 1) = '9' THEN SUBSTR(START, LENGTH(START) - 1) + 1900 ELSE SUBSTR(START, LENGTH(START) - 1) + 2000 END LIMIT 1",,"[('1b0b08fc-7d16-4adc-9331-acca6185a468',)]",no,0
+"SELECT DISTINCT student.name, enrolled.school
+FROM student
+JOIN enrolled ON student.name = enrolled.name
+WHERE enrolled.month = 15;","SELECT name, school FROM enrolled WHERE month = 15",,"[('student175', 'uci'), ('student211', 'uci'), ('student214', 'smc'), ('student222', 'smc'), ('student229', 'occ'), ('student401', 'uci'), ('student42', 'smc'), ('student59', 'uci'), ('student599', 'occ'), ('student635', 'smc'), ('student700', 'uci'), ('student727', 'smc'), ('student753', 'occ'), ('student792', 'ucla'), ('student842', 'occ'), ('student894', 'smc')]",yes,0
+"SELECT COUNT(S.student_id) - COUNT(S.student_id) OVER (PARTITION BY S.student_id having S.type = 'UG') AS ""Difference"" FROM RA AS S
+WHERE S.capability < 3",SELECT SUM(CASE WHEN T2.type = 'UG' THEN 1 ELSE 0 END) - SUM(CASE WHEN T2.type = 'RPG' THEN 1 ELSE 0 END) FROM RA AS T1 INNER JOIN student AS T2 ON T1.student_id = T2.student_id WHERE T1.capability < 3,,"[(0,)]",no,0
+"SELECT COUNT(*)
+FROM ratings
+WHERE movie_id IN (
+  SELECT movie_id
+  FROM movies
+  ORDER BY movie_popularity DESC
+  LIMIT 1
+);",SELECT COUNT(T1.critic) FROM ratings AS T1 INNER JOIN movies AS T2 ON T1.movie_id = T2.movie_id WHERE T2.movie_popularity = ( SELECT MAX(movie_popularity) FROM movies ),"[(41494,)]","[(545,)]",yes,0
+"SELECT DISTINCT
+  official_full_name
+FROM current
+WHERE
+  party = 'Independent';",SELECT T1.official_full_name FROM current AS T1 INNER JOIN `current-terms` AS T2 ON T1.bioguide_id = T2.bioguide WHERE T2.party = 'Independent' GROUP BY T1.official_full_name,,"[('Angus S. King, Jr.',), ('Bernard Sanders',), ('Gregorio Kilili Camacho Sablan',)]",yes,0
+"SELECT
+  SUM(o.quantityordered) AS TotalQuantityOrdered
+FROM orders AS o
+JOIN products AS p
+  ON o.productcode = p.productcode
+WHERE
+  o.orderdate BETWEEN DATE('1957-01-01') AND DATE('1957-12-31')
+  AND p.productname = '1957 Chevy Pickup'
+GROUP BY
+  STRFTIME('%Y', o.orderdate)
+ORDER BY
+  STRFTIME('%Y', o.orderdate) ASC;",SELECT COUNT(T2.customerNumber) FROM orderdetails AS T1 INNER JOIN orders AS T2 ON T1.orderNumber = T2.orderNumber WHERE T1.productCode IN ( SELECT productCode FROM products WHERE productName = '1957 Chevy Pickup' ),,"[(28,)]",yes,0
+SELECT Venue_Name FROM Venue JOIN City ON Venue.City_Id = City.City_Id WHERE City_Name = 'Bangalore';,SELECT T1.Venue_Name FROM Venue AS T1 INNER JOIN City AS T2 ON T1.City_ID = T2.City_ID WHERE T2.City_Name = 'Bangalore',"[('M Chinnaswamy Stadium',)]","[('M Chinnaswamy Stadium',)]",yes,1
+"SELECT
+  COUNT(DISTINCT competitor_event.event_id)
+FROM competitor_event
+INNER JOIN event
+  ON competitor_event.event_id = event.id
+WHERE
+  event.event_name = 'Swimming Men''s 200 metres Freestyle'
+  AND competitor_event.competitor_id IN (
+    SELECT
+      person.id
+    FROM person
+    WHERE
+      person.full_name = 'Ian Thorpe'
+  );",SELECT COUNT(T1.id) FROM person AS T1 INNER JOIN games_competitor AS T2 ON T1.id = T2.person_id INNER JOIN competitor_event AS T3 ON T2.id = T3.competitor_id INNER JOIN event AS T4 ON T3.event_id = T4.id WHERE T1.full_name = 'Ian James Thorpe' AND T4.event_name LIKE 'Swimming Men%s 200 metres Freestyle',"[(0,)]","[(2,)]",yes,0
+"SELECT COUNT(DISTINCT Suppliers.SupplierID)
+FROM Suppliers
+WHERE Suppliers.Country = 'USA';",SELECT COUNT(SupplierID) FROM Suppliers WHERE Country = 'USA',"[(4,)]","[(4,)]",yes,1
+SELECT keyword_id FROM keyword JOIN movie_keywords ON keyword.keyword_id = movie_keywords.keyword_id JOIN movie ON movie_keywords.movie_id = movie.movie_id WHERE movie.title = 'Sin City';,SELECT T2.keyword_id FROM movie AS T1 INNER JOIN movie_keywords AS T2 ON T1.movie_id = T2.movie_id WHERE T1.title = 'Sin City',,"[(4565,), (9717,), (15365,), (18712,), (158973,), (159362,), (171570,), (175593,), (175600,), (175603,), (175610,), (207268,)]",yes,0
+"SELECT DIVIDE(COUNT(words.wid), COUNT(words.wid)) AS percentage FROM words WHERE words.lid = 1 AND words.occurrences > 16000;",SELECT CAST(COUNT(CASE WHEN occurrences > 16000 THEN lid ELSE NULL END) AS REAL) * 100 / COUNT(lid) FROM langs_words,,"[(0.0675227016603279,)]",yes,0
+SELECT COUNT(*) FROM enlist WHERE organ = 'fire_department';,SELECT COUNT(name) FROM enlist WHERE organ = 'fire_department',"[(114,)]","[(114,)]",yes,1
+"
+SELECT COUNT(DISTINCT l_orderkey)
+FROM lineitem
+WHERE l_returnflag = 'R' AND l_quantity > 10;
+",SELECT COUNT(l_linenumber) FROM lineitem WHERE l_quantity > 10 AND l_returnflag = 'R',"[(289490,)]","[(552766,)]",yes,0
+"SELECT
+  T2.preparation
+FROM Ingredient AS T1
+INNER JOIN Quantity AS T2
+  ON T1.ingredient_id = T2.ingredient_id
+INNER JOIN Recipe AS T3
+  ON T2.recipe_id = T3.recipe_id
+WHERE
+  T1.name = 'apple juice' AND T3.title = 'Raspberry-Pear Couscous Cake';",SELECT T2.preparation FROM Recipe AS T1 INNER JOIN Quantity AS T2 ON T1.recipe_id = T2.recipe_id INNER JOIN Ingredient AS T3 ON T3.ingredient_id = T2.ingredient_id WHERE T1.title = 'Raspberry-Pear Couscous Cake' AND T3.name = 'apple juice',"[('chilled',)]","[('chilled',)]",yes,1
+"SELECT event_name
+FROM event
+WHERE event.id IN (
+  SELECT event_id
+  FROM competitor_event
+  WHERE medal_id IN (
+    SELECT id
+    FROM medal
+    WHERE medal_name = 'Gold'
+  )
+  GROUP BY event_id
+  ORDER BY COUNT(*) DESC
+  LIMIT 1
+);",SELECT T2.event_name FROM competitor_event AS T1 INNER JOIN event AS T2 ON T1.event_id = T2.id INNER JOIN medal AS T3 ON T1.medal_id = T3.id WHERE T3.medal_name = 'Gold' GROUP BY T2.id ORDER BY COUNT(T1.event_id) DESC LIMIT 1,"[(""Football Men's Football"",)]","[(""Football Men's Football"",)]",yes,1
+"
+SELECT
+  SUBSTR(MIN(HireDate, '2011-12-31'), 1, 4) - SUBSTR(HireDate, 1, 4) AS Length_of_Service
+FROM
+  Employee AS E
+WHERE
+  E.EmployeeID IN (
+    SELECT
+      EmployeeID
+    FROM
+      SalesOrderHeader
+    WHERE
+      Status = 1
+  );
+","SELECT 2011 - STRFTIME('%Y', T2.HireDate) FROM Document AS T1 INNER JOIN Employee AS T2 ON T1.Owner = T2.BusinessEntityID WHERE T1.Status = 1",,"[(2,), (2,)]",yes,0
+SELECT COUNT(*) AS NeutralReviewCount FROM user_reviews WHERE Sentiment = 'Neutral' AND App = 'Dino War: Rise of Beasts';,SELECT COUNT(App) FROM user_reviews WHERE App = 'Dino War: Rise of Beasts' AND Sentiment = 'Neutral',"[(5,)]","[(5,)]",yes,1
+"SELECT
+  Name
+FROM Author
+WHERE
+  Affiliation = ""Asan Medical Center, University of Ulsan College of Medicine, Seoul, Korea""
+  AND Id IN (
+    SELECT
+      AuthorId
+    FROM PaperAuthor
+    WHERE
+      PaperId IN (
+        SELECT
+          Id
+        FROM Paper
+        WHERE
+          Title = ""A Randomized Comparison of Sirolimus- Versus Paclitaxel-Eluting Stent Implantation in Patients With Diabetes Mellitus""
+      )
+  );","SELECT T2.Name FROM Paper AS T1 INNER JOIN PaperAuthor AS T2 ON T1.Id = T2.PaperId WHERE T2.Affiliation = 'Asan Medical Center, University of Ulsan College of Medicine, Seoul, Korea' AND T1.Title = 'A Randomized Comparison of Sirolimus- Versus Paclitaxel-Eluting Stent Implantation in Patients With Diabetes Mellitus'",[],"[('Cheol Whan Lee',), ('Seung-Whan Lee',), ('Myeong-Ki Hong',), ('Young-Hak Kim',), ('Seong-Wook Park',)]",yes,0
+"SELECT
+DIVIDE(COUNT(CASE WHEN (INCOME_K > 3000 and age BETWEEN 80 AND 89) THEN 1 END), COUNT(CASE WHEN INCOME_K > 3000 THEN 1 END)) * 100 as percentage
+FROM
+Customers",SELECT CAST(SUM(CASE WHEN T1.age BETWEEN 80 AND 89 THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.ID) FROM Customers AS T1 INNER JOIN Demog AS T2 ON T1.GEOID = T2.GEOID WHERE T2.INCOME_K > 3000,,"[(22.394755003450655,)]",yes,0
+"SELECT 
+    SUM(quantityOrdered) AS TotalQuantityOrdered,
+    AVG(priceEach) AS AveragePrice
+FROM 
+    orderdetails AS o
+JOIN 
+    products AS p ON o.productCode = p.productCode
+WHERE 
+    p.productName = '18th Century Vintage Horse Carriage';","SELECT SUM(T2.quantityOrdered) , SUM(T2.quantityOrdered * T2.priceEach) / SUM(T2.quantityOrdered) FROM products AS T1 INNER JOIN orderdetails AS T2 ON T1.productCode = T2.productCode WHERE T1.productName = '18th Century Vintage Horse Carriage'","[(907, 94.17392857142856)]","[(907, 94.07780595369347)]",yes,0
+"
+SELECT ProductSubcategoryID
+FROM ProductSubcategory
+LIMIT 3;
+",SELECT DISTINCT ProductCategoryID FROM ProductSubcategory LIMIT 3,"[(2,), (3,), (15,)]","[(1,), (2,), (3,)]",yes,0
+"SELECT 
+  podcasts.title 
+FROM 
+  podcasts 
+JOIN 
+  categories ON podcasts.podcast_id = categories.podcast_id 
+WHERE 
+  categories.category = ""Fiction"";",SELECT T2.title FROM categories AS T1 INNER JOIN podcasts AS T2 ON T2.podcast_id = T1.podcast_id WHERE T1.category = 'fiction',[],"[('LifeAfter/The Message',), ('The Truth',), ('RABBITS',), ('Secrets, Crimes & Audiotape',), ('The Leviathan Chronicles',)]",yes,0
+SELECT COUNT(*) FROM Credit WHERE person_id = (SELECT person_id FROM Person WHERE name = 'Park Dietz') AND credited = true;,SELECT COUNT(T3.person_id) FROM Episode AS T1 INNER JOIN Credit AS T2 ON T1.episode_id = T2.episode_id INNER JOIN Person AS T3 ON T3.person_id = T2.person_id WHERE T2.credited = 'true' AND T3.name = 'Park Dietz',"[(0,)]","[(11,)]",yes,0
+SELECT DISTINCT community_area_name FROM Community_Area WHERE side = 'Northwest',SELECT community_area_name FROM Community_Area WHERE side = 'Northwest',[],[],yes,1
+"SELECT movieid
+FROM u2base
+WHERE userid IN (
+    SELECT userid
+    FROM users
+    WHERE u_gender = 'F'
+)
+GROUP BY movieid
+ORDER BY COUNT(*) DESC
+LIMIT 1;",SELECT T1.movieid FROM u2base AS T1 INNER JOIN users AS T2 ON T1.userid = T2.userid WHERE T2.u_gender = 'F' GROUP BY T1.movieid ORDER BY COUNT(T2.userid) DESC LIMIT 1,"[(1721568,)]","[(1721568,)]",yes,1
+"SELECT COUNT(*)
+FROM Person
+WHERE birth_country = 'USA'
+AND name IN (
+  SELECT DISTINCT
+    person
+  FROM Award
+  WHERE award_category = 'Outstanding Animated Program (For Programming Less Than One Hour)'
+  AND result = 'Nominee'
+  AND year = 2009
+  AND role = 'Crew'
+);",SELECT COUNT(*) FROM Person AS T1 INNER JOIN Award AS T2 ON T1.name = T2.person WHERE T1.birth_country = 'USA' AND T2.result = 'Nominee' AND T2.award = 'Outstanding Animated Program (For Programming Less Than One Hour)' AND T2.year = 2009;,"[(0,)]","[(11,)]",yes,0
+"SELECT c.CategoryName
+FROM Products p
+JOIN Categories c ON p.CategoryID = c.CategoryID
+WHERE p.Discontinued = 1
+GROUP BY c.CategoryName
+HAVING COUNT(*) = (SELECT COUNT(*) FROM Products WHERE Discontinued = 1)
+ORDER BY COUNT(*) DESC
+LIMIT 1",SELECT T2.CategoryName FROM Products AS T1 INNER JOIN Categories AS T2 ON T1.CategoryID = T2.CategoryID WHERE T1.Discontinued = 1 GROUP BY T2.CategoryName ORDER BY COUNT(T1.ProductID) DESC LIMIT 1,,,yes,0
